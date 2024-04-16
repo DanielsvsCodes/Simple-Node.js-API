@@ -1,4 +1,5 @@
 const bcrypt = require('bcryptjs');
+const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const { validationResult } = require('express-validator');
 const User = require('../models/User');
@@ -35,18 +36,24 @@ const getUsers = async (req, res) => {
   }
 };
 
-const getUserById = async (req, res) => {
+const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const { identifier } = req.params;
+    let user;
+
+    if (mongoose.Types.ObjectId.isValid(identifier)) {
+      user = await User.findOne({ _id: identifier, deleted: false }).select('-password');
+    } else {
+      user = await User.findOne({ email: identifier, deleted: false }).select('-password');
+    }
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
-    res.json({ user: user.toJSON() });
+
+    res.json({ user });
   } catch (error) {
-    if (error.message.includes('Cast to ObjectId failed')) {
-      return res.status(404).json({ error: 'User not found' });
-    }
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -91,7 +98,19 @@ const updateUser = async (req, res) => {
 
 const deleteUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.id);
+    const { identifier } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(identifier)) {
+      const user = await User.findOne({ email: identifier });
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      user.deleted = true;
+      await user.save();
+      return res.json({ message: 'User deleted successfully' });
+    }
+
+    const user = await User.findOne({ $or: [{ _id: identifier }, { email: identifier }] });
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -99,7 +118,7 @@ const deleteUser = async (req, res) => {
     await user.save();
     res.json({ message: 'User deleted successfully' });
   } catch (error) {
-    res.status(400).json({ error: error.message });
+    res.status(500).json({ error: error.message });
   }
 };
 
@@ -112,4 +131,4 @@ const generateToken = async (req, res) => {
   }
 };
 
-module.exports = { createUser, getUsers, getUserById, updateUser, deleteUser, generateToken };
+module.exports = { createUser, getUsers, getUser, updateUser, deleteUser, generateToken };
