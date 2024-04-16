@@ -53,6 +53,7 @@ function Actions() {
         setUserList('');
         break;
       case 'seeAll':
+        console.log('All Users action');
         await fetchUsers();
         break;
       case 'verify':
@@ -123,28 +124,62 @@ function Actions() {
           console.error('Error deleting user:', error);
         }
         break;
-        case 'create':
-          try {
-            const { name, email, password } = createData;
-            if (!name || !email || !password) {
-              throw new Error('Name, email, and password are required');
-            }
-            const userData = { name, email, password };
-            const response = await fetch('http://localhost:5000/users', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-              },
-              body: JSON.stringify(userData)
-            });
-            if (!response.ok) {
-              throw new Error('Failed to create user');
-            }
-            setCreateMessage('User has been created successfully');
-          } catch (error) {
-            console.error('Error creating user:', error);
-            setCreateMessage(error.message);
+      case 'create':
+        try {
+          const { name, email, password } = createData;
+          if (!name || !email || !password) {
+            throw new Error('Name, email, and password are required');
           }
+          const userData = { name, email, password };
+          const response = await fetch('http://localhost:5000/users', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(userData)
+          });
+          console.log(response);
+          console.log(JSON.stringify(userData));
+          if (!response.ok) {
+            throw new Error('Failed to create user');
+          }
+          setCreateMessage('User has been created successfully');
+        } catch (error) {
+          console.error('Error creating user:', error);
+          setCreateMessage(error.message);
+        }
+        break;
+      case 'update':
+        try {
+          const { name, email, password } = updateUser;
+          if (!name || !email || !password) {
+            throw new Error('Name, email, and password are required');
+          }
+
+          const updateData = {};
+          if (name) updateData.name = name;
+          if (email) updateData.email = email;
+          if (password) updateData.password = password;
+      
+          const response = await fetch(`http://localhost:5000/users/${userId}`, {
+            method: 'PATCH',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `${token}`
+            },
+            body: JSON.stringify(updateData)
+          });
+      
+          if (!response.ok) {
+            throw new Error('Failed to update user');
+          }
+      
+          setUpdateMessage('User has been updated successfully');
+          setUpdateUser({ name: '', email: '', password: '' });
+        } catch (error) {
+          console.error('Error updating user:', error);
+          setUpdateMessage(error.message);
+        }
         break;
       default:
         break;
