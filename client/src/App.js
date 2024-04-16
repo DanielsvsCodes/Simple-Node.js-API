@@ -37,12 +37,14 @@ function GenerateToken() {
 
 function Actions() {
   const [userList, setUserList] = useState('');
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [token] = useState(localStorage.getItem('token') || '');
   const [action, setAction] = useState('');
   const [userId, setUserId] = useState('');
   const [deleteMessage, setDeleteMessage] = useState('');
   const [createData, setCreateData] = useState({ name: '', email: '', password: '' });
   const [createMessage, setCreateMessage] = useState('');
+  const [updateData, setUpdateData] = useState({ name: '', email: '', password: '' });
+  const [updateMessage, setUpdateMessage] = useState('');
 
   const handleAction = async (selectedAction) => {
     setAction(selectedAction);
@@ -151,31 +153,26 @@ function Actions() {
         break;
       case 'update':
         try {
-          const { name, email, password } = updateUser;
-          if (!name || !email || !password) {
-            throw new Error('Name, email, and password are required');
+          const { name, email, password } = updateData;
+          if (!name && !email && !password) {
+            throw new Error('At least one field (name, email, or password) must be filled to update');
           }
-
-          const updateData = {};
-          if (name) updateData.name = name;
-          if (email) updateData.email = email;
-          if (password) updateData.password = password;
-      
+          const userData = {};
+          if (name) userData.name = name;
+          if (email) userData.email = email;
+          if (password) userData.password = password;
           const response = await fetch(`http://localhost:5000/users/${userId}`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
               'Authorization': `${token}`
             },
-            body: JSON.stringify(updateData)
+            body: JSON.stringify(userData)
           });
-      
           if (!response.ok) {
             throw new Error('Failed to update user');
           }
-      
           setUpdateMessage('User has been updated successfully');
-          setUpdateUser({ name: '', email: '', password: '' });
         } catch (error) {
           console.error('Error updating user:', error);
           setUpdateMessage(error.message);
@@ -223,23 +220,56 @@ function Actions() {
         </div>
       ) : (
         <div>
-          {action === 'delete' || action === 'verify' ? (
-            <div>
-              <div className="input">
-                <input
-                  type="text"
-                  placeholder={`Enter user ID/EMAIL to ${action.toUpperCase()}`}
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                />
-                <button onClick={handleActionSubmit}>{action.toUpperCase()}</button>
-              </div>
-              {action === 'verify' && <textarea value={userList} readOnly rows={10} cols={50} />}
-              {action === 'delete' && <p>{deleteMessage}</p>}
+          {action === 'update' ? (
+            <div className="create">
+              <input
+                type="text"
+                placeholder="User ID"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+              />
+              <input
+                type="text"
+                placeholder="New Name"
+                value={updateData.name}
+                onChange={(e) => setUpdateData({ ...updateData, name: e.target.value })}
+              />
+              <input
+                type="email"
+                placeholder="New Email"
+                value={updateData.email}
+                onChange={(e) => setUpdateData({ ...updateData, email: e.target.value })}
+              />
+              <input
+                type="password"
+                placeholder="New Password"
+                value={updateData.password}
+                onChange={(e) => setUpdateData({ ...updateData, password: e.target.value })}
+              />
+              <button onClick={handleActionSubmit}>UPDATE</button>
+              {updateMessage && <p>{updateMessage}</p>}
             </div>
           ) : (
-            <div className="textshow">
-              <textarea value={userList} readOnly rows={10} cols={50} />
+            <div>
+              {action === 'delete' || action === 'verify' ? (
+                <div>
+                  <div className="input">
+                    <input
+                      type="text"
+                      placeholder={`Enter user ID/EMAIL to ${action.toUpperCase()}`}
+                      value={userId}
+                      onChange={(e) => setUserId(e.target.value)}
+                    />
+                    <button onClick={handleActionSubmit}>{action.toUpperCase()}</button>
+                  </div>
+                  {action === 'verify' && <textarea value={userList} readOnly rows={10} cols={50} />}
+                  {action === 'delete' && <p>{deleteMessage}</p>}
+                </div>
+              ) : (
+                <div className="textshow">
+                  <textarea value={userList} readOnly rows={10} cols={50} />
+                </div>
+              )}
             </div>
           )}
         </div>
