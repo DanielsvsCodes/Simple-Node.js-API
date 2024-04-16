@@ -59,14 +59,20 @@ const getUser = async (req, res) => {
 
 const updateUser = async (req, res) => {
   try {
-    const userId = req.params.id;
+    const { identifier } = req.params;
     const { name, email, password } = req.body;
 
     if (!name && !email && !password) {
       return res.status(400).json({ error: 'At least one field must be provided for update' });
     }
 
-    const user = await User.findById(userId);
+    let user;
+    if (mongoose.Types.ObjectId.isValid(identifier)) {
+      user = await User.findOne({ _id: identifier, deleted: false });
+    } else {
+      user = await User.findOne({ email: identifier, deleted: false });
+    }
+
     if (!user) {
       return res.status(404).json({ error: 'User not found' });
     }
@@ -76,7 +82,7 @@ const updateUser = async (req, res) => {
     }
     if (email) {
       const existingUser = await User.findOne({ email });
-      if (existingUser && existingUser._id.toString() !== userId) {
+      if (existingUser && existingUser._id.toString() !== user._id.toString()) {
         return res.status(400).json({ error: 'Email already in use' });
       }
       user.email = email;

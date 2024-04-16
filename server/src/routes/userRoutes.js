@@ -11,7 +11,7 @@ router.post('/', [
 ], createUser);
 router.get('/', authenticateToken, getUsers);
 router.get('/:identifier', authenticateToken, getUser);
-router.patch('/:id', authenticateToken, updateUser);
+router.patch('/:identifier', authenticateToken, updateUser);
 router.delete('/:identifier', authenticateToken, deleteUser);
 router.post('/token', generateToken);
 
