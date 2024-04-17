@@ -17,6 +17,111 @@ body {
   background-color: #a9d9a9;
 }
 
+.mainPanel {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  width: 75%;
+  background-color: #ebebeb;
+}
+
+.createTitle,
+.seeAllTitle,
+.verifyTitle,
+.updateTitle,
+.deleteTitle {
+  display: flex;
+  color: black;
+  font-weight: 1000;
+  -webkit-text-stroke: 1px black;
+  justify-content: flex-start;
+  padding-left: 25px;
+}
+
+.createPanel,
+.seeAllPanel,
+.updatePanel,
+.verifyInfo,
+.deletePanel  {
+  display: flex;
+  margin-top: 30px;
+  padding-left: 25px;
+  flex-direction: column;
+}
+
+.verifyPanel {
+  display: flex;
+  margin-top: 30px;
+  padding-left: 25px;
+  flex-direction: row;
+}
+
+.createPanel input,
+.verifyPanel input,
+.updatePanel input,
+.deletePanel input  {
+  width: 50%;
+  padding: 15px;
+  margin-bottom: 10px;
+}
+
+.createPanel button,
+.updatePanel button,
+.deletePanel button {
+  width: 52.3%;
+  padding: 15px;
+  margin-top: 60px;
+  margin-bottom: 10px;
+  background-color: #a9d9a9;
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+.createPanel p {
+  font-size: 18px;
+}
+
+.seeAllPanel th {
+  background-color: #a9d9a9;
+  border: 1px solid black;
+  font-size: 20px;
+}
+
+.seeAllPanel td {
+  background-color: white;
+  border: 1px solid black;
+  text-align: center;
+  font-size: 20px;
+}
+
+.verifyPanel button {
+  width: 15%;
+  padding: 15px;
+  margin-left: 20px;
+  margin-bottom: 10px;
+  background-color: #a9d9a9;
+  transition: background-color 0.3s;
+  cursor: pointer;
+}
+
+.verifyName,
+.verifyEmail {
+  display: flex;
+}
+
+.infoTxt {
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.infoValue {
+  font-size: 20px;
+}
+
+.updateId {
+  margin-bottom: 30px;
+}
+
 .token-container {
   margin-bottom: 20px;
 }
@@ -45,6 +150,7 @@ body {
   padding: 15px;
   background-color: white;
   border-color: grey;
+  cursor: pointer;
 }
 
 .back {
@@ -60,6 +166,7 @@ body {
   padding: 15px;
   background-color: white;
   border-color: grey;
+  cursor: pointer;
 }
 
 .actions button,
@@ -70,11 +177,18 @@ body {
   background-color: white;
   border-color: grey;
   transition: background-color 0.3s;
+  cursor: pointer;
 }
 
 .actions button:hover,
-.back button:hover {
+.back button:hover{
   background-color: lightgrey;
+}
+
+.createPanel button:hover,
+.verifyPanel button:hover,
+.updatePanel button:hover {
+  background-color: white;
 }
 
 .input {
@@ -82,23 +196,4 @@ body {
   margin-top: 20px;
   margin-bottom: 20px;
   justify-content: center;
-}
-
-.create {
-  display: flex;
-  margin-top: 20px;
-  flex-direction: column;
-}
-
-.create input {
-  margin-top: 10px;
-}
-
-.create button {
-  margin-top: 10px;
-}
-
-.textshow {
-  margin-top: 20px;
-  display: flex;
 }

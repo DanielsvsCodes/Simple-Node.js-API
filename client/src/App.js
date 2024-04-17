@@ -81,7 +81,6 @@ function Actions() {
           }
           const { user } = await response.json();
           setUserList([user]);
-          setVerifyMessage('User verified successfully');
         } catch (error) {
           console.error('Error verifying user:', error);
           setVerifyMessage(error.message);
@@ -168,73 +167,134 @@ function Actions() {
       </div>
       <div className='mainPanel'>
         {action === 'seeAll' && userList.length > 0 && (
-          <table>
-            <thead>
-              <tr>
-                <th>Name</th>
-                <th>Email</th>
-                <th>Password</th>
-                <th>Deleted</th>
-              </tr>
-            </thead>
-            <tbody>
-              {userList.map(user => (
-                <tr key={user.id}>
-                  <td>{user.name}</td>
-                  <td>{user.email}</td>
-                  <td>{user.password}</td>
-                  <td>{user.deleted ? 'Yes' : 'No'}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <div className='seeAll'>
+            <div className='seeAllTitle'>
+              <h1>See All User:</h1>
+            </div>
+            <div className='seeAllPanel'>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Deleted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {userList.map(user => (
+                    <tr key={user.id}>
+                      <td>{user.name}</td>
+                      <td>{user.email}</td>
+                      <td>{user.password}</td>
+                      <td>{user.deleted ? 'Yes' : 'No'}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
-        {action === 'seeAll' && userList.length === 0 && <p>No users found</p>}
+        {action === 'seeAll' && userList.length === 0 && (
+          <div className='seeAll'>
+            <div className='seeAllTitle'>
+              <h1>See All User:</h1>
+            </div>
+            <div className='seeAllPanel'>
+              <table>
+                <thead>
+                  <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Password</th>
+                    <th>Deleted</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <p>No users found</p>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
         {action === 'create' && (
           <div className="create">
-            <input type="text" placeholder="Name" value={createData.name} onChange={(e) => setCreateData({ ...createData, name: e.target.value })} />
-            <input type="email" placeholder="Email" value={createData.email} onChange={(e) => setCreateData({ ...createData, email: e.target.value })} />
-            <input type="password" placeholder="Password" value={createData.password} onChange={(e) => setCreateData({ ...createData, password: e.target.value })} />
-            <button onClick={() => handleActionSubmit('create')}>CREATE</button>
-            {createMessage && <p>{createMessage}</p>}
+            <div className='createTitle'>
+              <h1>Create User:</h1>
+            </div>
+            <div className='createPanel'>
+              <input type="text" placeholder="Name" value={createData.name} onChange={(e) => setCreateData({ ...createData, name: e.target.value })} />
+              <input type="email" placeholder="Email" value={createData.email} onChange={(e) => setCreateData({ ...createData, email: e.target.value })} />
+              <input type="password" placeholder="Password" value={createData.password} onChange={(e) => setCreateData({ ...createData, password: e.target.value })} />
+              <button onClick={() => handleActionSubmit('create')}>CREATE</button>
+              {createMessage && <p>{createMessage}</p>}
+            </div>
           </div>
         )}
         {action === 'verify' && !verifyClicked && (
-          <div>
-            <input type="text" placeholder="Email" value={userId} onChange={(e) => setUserId(e.target.value)} />
-            <button onClick={() => { handleActionSubmit('verify'); setVerifyClicked(true); }}>VERIFY</button>
+          <div className='verify'>
+            <div className='verifyTitle'>
+              <h1>Verify User:</h1>
+            </div>
+            <div className='verifyPanel'>
+              <input type="text" placeholder="ENTER ID OR EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
+              <button onClick={() => { handleActionSubmit('verify'); setVerifyClicked(true); }}>VERIFY</button>
+            </div>
           </div>
         )}
         {action === 'verify' && verifyClicked && (
-          <div>
-            <input type="text" placeholder="Email" value={userId} onChange={(e) => setUserId(e.target.value)} />
-            <button onClick={() => { handleActionSubmit('verify'); setVerifyClicked(true); }}>VERIFY</button>
-            {userList.length > 0 && userList[0] ? (
-              <div>
-                <p>Name: {userList[0].name}</p>
-                <p>Email: {userList[0].email}</p>
-              </div>
-            ) : (
-              <p>No user found</p>
-            )}
-            {verifyMessage && <p>{verifyMessage}</p>}
+          <div className='verify'>
+            <div className='verifyTitle'>
+              <h1>Verify User:</h1>
+            </div>
+            <div className='verifyPanel'>
+              <input type="text" placeholder="ENTER ID OR EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
+              <button onClick={() => { handleActionSubmit('verify'); setVerifyClicked(true); }}>VERIFY</button>
+            </div>
+            <div className='verifyInfo'>
+              {userList.length > 0 && userList[0] ? (
+                <div>
+                  <div className='verifyName'>
+                  <p className='infoTxt'>Name:&nbsp;</p><p className='infoValue'>{userList[0].name}</p>
+                  </div>
+                  <div className='verifyEmail'>
+                  <p className='infoTxt'>Email:&nbsp;</p><p className='infoValue'> {userList[0].email}</p>
+                  </div>
+                </div>
+              ) : (
+                <p>No user found</p>
+              )}
+              {verifyMessage && <p>{verifyMessage}</p>}
+            </div>
           </div>
         )}
         {action === 'delete' && (
-          <div>
-            <input type="text" placeholder="Email" value={userId} onChange={(e) => setUserId(e.target.value)} />
-            <button onClick={() => handleActionSubmit('delete')}>DELETE</button>
-            {deleteMessage && <p>{deleteMessage}</p>}
+          <div className='delete'>
+            <div className='deleteTitle'>
+              <h1>Delete User:</h1>
+            </div>
+            <div className='deletePanel'>
+              <input type="text" placeholder="ENTER ID OR EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
+              <button onClick={() => handleActionSubmit('delete')}>DELETE</button>
+              {deleteMessage && <p>{deleteMessage}</p>}
+            </div>
           </div>
         )}
         {action === 'update' && (
-          <div>
-            <input type="text" placeholder="Email" value={userId} onChange={(e) => setUserId(e.target.value)} />
-            <input type="text" placeholder="Name" value={updateData.name} onChange={(e) => setUpdateData({ ...updateData, name: e.target.value })} />
-            <input type="email" placeholder="Email" value={updateData.email} onChange={(e) => setUpdateData({ ...updateData, email: e.target.value })} />
-            <input type="password" placeholder="Password" value={updateData.password} onChange={(e) => setUpdateData({ ...updateData, password: e.target.value })} />
-            <button onClick={() => handleActionSubmit('update')}>UPDATE</button>
-            {updateMessage && <p>{updateMessage}</p>}
+          <div className='update'>
+            <div className='updateTitle'>
+              <h1>Update User:</h1>
+            </div>
+            <div className='updatePanel'>
+              <div className='updateId'>           
+                <input type="text" placeholder="ENTER ID OR EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
+              </div>
+              <input type="text" placeholder="Name" value={updateData.name} onChange={(e) => setUpdateData({ ...updateData, name: e.target.value })} />
+              <input type="email" placeholder="Email" value={updateData.email} onChange={(e) => setUpdateData({ ...updateData, email: e.target.value })} />
+              <input type="password" placeholder="Password" value={updateData.password} onChange={(e) => setUpdateData({ ...updateData, password: e.target.value })} />
+              <button onClick={() => handleActionSubmit('update')}>UPDATE</button>
+              {updateMessage && <p>{updateMessage}</p>}
+            </div>
           </div>
         )}
       </div>
