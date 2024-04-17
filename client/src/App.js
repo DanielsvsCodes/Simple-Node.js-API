@@ -51,8 +51,10 @@ function Actions() {
   const handleActionSubmit = async (selectedAction) => {
     switch (selectedAction) {
       case 'seeAll':
+        setAction('seeAll')
         try {
           const response = await fetch('http://localhost:5000/users', {
+            method: 'GET',
             headers: {
               'Authorization': `${token}`
             }
@@ -155,7 +157,7 @@ function Actions() {
         <h1>ACTIONS</h1>
         <div className="actions">
           <button onClick={() => setAction('create')}>Create User</button>
-          <button onClick={() => setAction('seeAll')}>See All Users</button>
+          <button onClick={() => handleActionSubmit('seeAll')}>See All Users</button>
           <button onClick={() => setAction('verify')}>Verify User</button>
           <button onClick={() => setAction('update')}>Update User</button>
           <button onClick={() => setAction('delete')}>Delete User</button>
