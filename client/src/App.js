@@ -54,7 +54,7 @@ function Actions() {
       identifierType = 'email';
     }
 
-    switch (action) {
+    switch (selectedAction) {
       case 'seeAll':
         console.log("See All Action");
         try {
@@ -252,7 +252,7 @@ function Actions() {
                     <div className="input">
                       <input
                         type="text"
-                        placeholder={`Enter user ID/EMAIL to ${action.toUpperCase()}`}
+                        placeholder={`Enter user EMAIL to ${action.toUpperCase()}`}
                         value={userId}
                         onChange={(e) => setUserId(e.target.value)}
                       />
@@ -271,6 +271,7 @@ function Actions() {
           </div>
         )}
       </div>
+
     </div>
   );
 }
