@@ -125,6 +125,18 @@ body {
   font-size: 20px;
 }
 
+.seeAllTable {
+  width: 100%;
+}
+
+.seeAllTable th:nth-child(3),
+.seeAllTable td:nth-child(3) {
+  width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .verifyPanel button {
   width: 15%;
   padding: 15px;

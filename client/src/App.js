@@ -172,7 +172,7 @@ function Actions() {
               <h1>See All User:</h1>
             </div>
             <div className='seeAllPanel'>
-              <table>
+              <table className='seeAllTable'>
                 <thead>
                   <tr>
                     <th>Name</th>
@@ -201,7 +201,7 @@ function Actions() {
               <h1>See All User:</h1>
             </div>
             <div className='seeAllPanel'>
-              <table>
+              <table className='seeAllTable'>
                 <thead>
                   <tr>
                     <th>Name</th>
