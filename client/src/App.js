@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
-import { BrowserRouter as Router, Routes, Route, Link } from 'react-router-dom';
+import { BrowserRouter as Router, Routes, Route, Link, useNavigate } from 'react-router-dom';
 import './App.css';
 
 function GenerateToken() {
-  const [token, setToken] = useState(localStorage.getItem('token') || '');
+  const [token, setToken] = useState('');
+  const navigate = useNavigate();
 
   const handleGenerateToken = async () => {
     try {
@@ -14,8 +15,9 @@ function GenerateToken() {
         throw new Error('Failed to generate token');
       }
       const { token } = await response.json();
-      setToken(token);
       localStorage.setItem('token', token);
+      setToken(token);
+      navigate('/actions');
     } catch (error) {
       console.error('Error generating token:', error);
     }
@@ -23,13 +25,11 @@ function GenerateToken() {
 
   return (
     <div className="App">
-      <h1>Generate Token</h1>
-      <div className="token-container">
-        <input type="text" value={token} readOnly />
-      </div>
-      <div className="buttons-container">
-        <button onClick={handleGenerateToken}>Generate Token</button>
-        <Link to="/actions"><button>Next</button></Link>
+      <div className='AppBox'>
+        <h1>Unlock Actions</h1>
+        <div className="buttons-container">
+          <button onClick={handleGenerateToken}>UNLOCK</button>
+        </div>
       </div>
     </div>
   );
@@ -151,7 +151,7 @@ function Actions() {
   };
 
   return (
-    <div className="App">
+    <div className="AppActions">
       <div className='sideBar'>
         <h1>ACTIONS</h1>
         <div className="actions">
@@ -162,7 +162,7 @@ function Actions() {
           <button onClick={() => setAction('delete')}>Delete User</button>
         </div>
         <div className='back'>
-          <Link to="/"><button>Back to Token Generation</button></Link>
+          <Link to="/"><button>Back to Menu</button></Link>
         </div>
       </div>
       <div className='mainPanel'>
