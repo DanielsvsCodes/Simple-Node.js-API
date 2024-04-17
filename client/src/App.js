@@ -45,18 +45,12 @@ function Actions() {
   const [createMessage, setCreateMessage] = useState('');
   const [updateData, setUpdateData] = useState({ name: '', email: '', password: '' });
   const [updateMessage, setUpdateMessage] = useState('');
+  const [verifyMessage, setVerifyMessage] = useState('');
+  const [verifyClicked, setVerifyClicked] = useState(false);
 
-  const handleActionSubmit  = async (selectedAction) => {
-    setAction(selectedAction);
-    setUserList('');
-    let identifierType = 'id';
-    if (userId.includes('@')) {
-      identifierType = 'email';
-    }
-
+  const handleActionSubmit = async (selectedAction) => {
     switch (selectedAction) {
       case 'seeAll':
-        console.log("See All Action");
         try {
           const response = await fetch('http://localhost:5000/users', {
             headers: {
@@ -67,13 +61,12 @@ function Actions() {
             throw new Error('Failed to fetch users');
           }
           const data = await response.json();
-          setUserList(JSON.stringify(data, null, 2));
+          setUserList(data);
         } catch (error) {
           console.error('Error fetching users:', error);
         }
         break;
       case 'verify':
-        console.log("Verify Action");
         try {
           const response = await fetch(`http://localhost:5000/users/${userId}`, {
             method: 'GET',
@@ -85,14 +78,14 @@ function Actions() {
             throw new Error('Failed to verify user');
           }
           const { user } = await response.json();
-          const { password, ...userData } = user;
-          setUserList(JSON.stringify(userData, null, 2));
+          setUserList([user]);
+          setVerifyMessage('User verified successfully');
         } catch (error) {
           console.error('Error verifying user:', error);
+          setVerifyMessage(error.message);
         }
         break;
       case 'delete':
-        console.log("Delete Action");
         try {
           const response = await fetch(`http://localhost:5000/users/${userId}`, {
             method: 'DELETE',
@@ -106,25 +99,21 @@ function Actions() {
           setDeleteMessage('User has been deleted');
         } catch (error) {
           console.error('Error deleting user:', error);
+          setDeleteMessage(error.message);
         }
         break;
       case 'create':
-        console.log("Create Action");
         try {
           const { name, email, password } = createData;
-          if (!name || !email || !password) {
-            throw new Error('Name, email, and password are required');
-          }
           const userData = { name, email, password };
           const response = await fetch('http://localhost:5000/users', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': `${token}`
             },
             body: JSON.stringify(userData)
           });
-          console.log(response);
-          console.log(JSON.stringify(userData));
           if (!response.ok) {
             throw new Error('Failed to create user');
           }
@@ -135,23 +124,10 @@ function Actions() {
         }
         break;
       case 'update':
-        console.log("Update Action");
         try {
           const { name, email, password } = updateData;
-          if (!name && !email && !password) {
-            throw new Error('At least one field (name, email, or password) must be filled to update');
-          }
-          const userData = {};
-          if (name) userData.name = name;
-          if (email) userData.email = email;
-          if (password) userData.password = password;
-          
-          let updateUrl = `http://localhost:5000/users/${userId}`;
-          if (identifierType === 'email') {
-            updateUrl += '?email=true';
-          }
-  
-          const response = await fetch(updateUrl, {
+          const userData = { name, email, password };
+          const response = await fetch(`http://localhost:5000/users/${userId}`, {
             method: 'PATCH',
             headers: {
               'Content-Type': 'application/json',
@@ -178,103 +154,92 @@ function Actions() {
       <div className='sideBar'>
         <h1>ACTIONS</h1>
         <div className="actions">
-          <button onClick={() => handleActionSubmit ('create')}>Create User</button>
-          <button onClick={() => handleActionSubmit ('seeAll')}>See All Users</button>
-          <button onClick={() => handleActionSubmit ('verify')}>Verify User</button>
-          <button onClick={() => handleActionSubmit ('update')}>Update User</button>
-          <button onClick={() => handleActionSubmit ('delete')}>Delete User</button>
+          <button onClick={() => setAction('create')}>Create User</button>
+          <button onClick={() => setAction('seeAll')}>See All Users</button>
+          <button onClick={() => setAction('verify')}>Verify User</button>
+          <button onClick={() => setAction('update')}>Update User</button>
+          <button onClick={() => setAction('delete')}>Delete User</button>
         </div>
         <div className='back'>
           <Link to="/"><button>Back to Token Generation</button></Link>
         </div>
       </div>
       <div className='mainPanel'>
-        {action === 'create' ? (
-          <div>
-            <div className="create">
-              <input
-                type="text"
-                placeholder="Name"
-                value={createData.name}
-                onChange={(e) => setCreateData({ ...createData, name: e.target.value })}
-              />
-              <input
-                type="email"
-                placeholder="Email"
-                value={createData.email}
-                onChange={(e) => setCreateData({ ...createData, email: e.target.value })}
-              />
-              <input
-                type="password"
-                placeholder="Password"
-                value={createData.password}
-                onChange={(e) => setCreateData({ ...createData, password: e.target.value })}
-              />
-              <button onClick={handleActionSubmit}>CREATE</button>
-            </div>
+        {action === 'seeAll' && userList.length > 0 && (
+          <table>
+            <thead>
+              <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Password</th>
+                <th>Deleted</th>
+              </tr>
+            </thead>
+            <tbody>
+              {userList.map(user => (
+                <tr key={user.id}>
+                  <td>{user.name}</td>
+                  <td>{user.email}</td>
+                  <td>{user.password}</td>
+                  <td>{user.deleted ? 'Yes' : 'No'}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {action === 'seeAll' && userList.length === 0 && <p>No users found</p>}
+        {action === 'create' && (
+          <div className="create">
+            <input type="text" placeholder="Name" value={createData.name} onChange={(e) => setCreateData({ ...createData, name: e.target.value })} />
+            <input type="email" placeholder="Email" value={createData.email} onChange={(e) => setCreateData({ ...createData, email: e.target.value })} />
+            <input type="password" placeholder="Password" value={createData.password} onChange={(e) => setCreateData({ ...createData, password: e.target.value })} />
+            <button onClick={() => handleActionSubmit('create')}>CREATE</button>
             {createMessage && <p>{createMessage}</p>}
           </div>
-        ) : (
+        )}
+        {action === 'verify' && !verifyClicked && (
           <div>
-            {action === 'update' ? (
-              <div className="create">
-                <input
-                  type="text"
-                  placeholder="User ID"
-                  value={userId}
-                  onChange={(e) => setUserId(e.target.value)}
-                />
-                <input
-                  type="text"
-                  placeholder="New Name"
-                  value={updateData.name}
-                  onChange={(e) => setUpdateData({ ...updateData, name: e.target.value })}
-                />
-                <input
-                  type="email"
-                  placeholder="New Email"
-                  value={updateData.email}
-                  onChange={(e) => setUpdateData({ ...updateData, email: e.target.value })}
-                />
-                <input
-                  type="password"
-                  placeholder="New Password"
-                  value={updateData.password}
-                  onChange={(e) => setUpdateData({ ...updateData, password: e.target.value })}
-                />
-                <button onClick={handleActionSubmit}>UPDATE</button>
-                {updateMessage && <p>{updateMessage}</p>}
+            <input type="text" placeholder="Email" value={userId} onChange={(e) => setUserId(e.target.value)} />
+            <button onClick={() => { handleActionSubmit('verify'); setVerifyClicked(true); }}>VERIFY</button>
+          </div>
+        )}
+        {action === 'verify' && verifyClicked && (
+          <div>
+            <input type="text" placeholder="Email" value={userId} onChange={(e) => setUserId(e.target.value)} />
+            <button onClick={() => { handleActionSubmit('verify'); setVerifyClicked(true); }}>VERIFY</button>
+            {userList.length > 0 && userList[0] ? (
+              <div>
+                <p>Name: {userList[0].name}</p>
+                <p>Email: {userList[0].email}</p>
               </div>
             ) : (
-              <div>
-                {action === 'delete' || action === 'verify' ? (
-                  <div>
-                    <div className="input">
-                      <input
-                        type="text"
-                        placeholder={`Enter user EMAIL to ${action.toUpperCase()}`}
-                        value={userId}
-                        onChange={(e) => setUserId(e.target.value)}
-                      />
-                      <button onClick={handleActionSubmit}>{action.toUpperCase()}</button>
-                    </div>
-                    {action === 'verify' && <textarea value={userList} readOnly rows={10} cols={50} />}
-                    {action === 'delete' && <p>{deleteMessage}</p>}
-                  </div>
-                ) : (
-                  <div className="textshow">
-                    <textarea value={userList} readOnly rows={10} cols={50} />
-                  </div>
-                )}
-              </div>
+              <p>No user found</p>
             )}
+            {verifyMessage && <p>{verifyMessage}</p>}
+          </div>
+        )}
+        {action === 'delete' && (
+          <div>
+            <input type="text" placeholder="Email" value={userId} onChange={(e) => setUserId(e.target.value)} />
+            <button onClick={() => handleActionSubmit('delete')}>DELETE</button>
+            {deleteMessage && <p>{deleteMessage}</p>}
+          </div>
+        )}
+        {action === 'update' && (
+          <div>
+            <input type="text" placeholder="Email" value={userId} onChange={(e) => setUserId(e.target.value)} />
+            <input type="text" placeholder="Name" value={updateData.name} onChange={(e) => setUpdateData({ ...updateData, name: e.target.value })} />
+            <input type="email" placeholder="Email" value={updateData.email} onChange={(e) => setUpdateData({ ...updateData, email: e.target.value })} />
+            <input type="password" placeholder="Password" value={updateData.password} onChange={(e) => setUpdateData({ ...updateData, password: e.target.value })} />
+            <button onClick={() => handleActionSubmit('update')}>UPDATE</button>
+            {updateMessage && <p>{updateMessage}</p>}
           </div>
         )}
       </div>
-
     </div>
   );
 }
+
 
 function App() {
   return (
