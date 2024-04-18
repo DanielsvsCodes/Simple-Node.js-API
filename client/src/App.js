@@ -35,8 +35,28 @@ function GenerateToken() {
   );
 }
 
+function isValidEmail(email) {
+  const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailPattern.test(email);
+}
+
+async function checkEmailExists(email) {
+  try {
+    const response = await fetch(`http://localhost:5000/users/email/${email}`);
+    if (!response.ok) {
+      throw new Error('Failed to check email existence');
+    }
+    const data = await response.json();
+    return !!data.exists;
+  } catch (error) {
+    console.error('Error checking email existence:', error);
+    return false;
+  }
+}
+
 function Actions() {
   const [userList, setUserList] = useState('');
+  const [verifiedUser, setVerifiedUser] = useState(null);
   const [token] = useState(localStorage.getItem('token') || '');
   const [action, setAction] = useState('');
   const [userId, setUserId] = useState('');
@@ -51,7 +71,7 @@ function Actions() {
   const handleActionSubmit = async (selectedAction) => {
     switch (selectedAction) {
       case 'seeAll':
-        setAction('seeAll')
+        setAction('seeAll');
         try {
           const response = await fetch('http://localhost:5000/users', {
             method: 'GET',
@@ -80,9 +100,11 @@ function Actions() {
             throw new Error('Failed to verify user');
           }
           const { user } = await response.json();
-          setUserList([user]);
+          setVerifiedUser(user);
+          setVerifyMessage('');
         } catch (error) {
           console.error('Error verifying user:', error);
+          setVerifiedUser(null);
           setVerifyMessage(error.message);
         }
         break;
@@ -106,26 +128,73 @@ function Actions() {
       case 'create':
         try {
           const { name, email, password } = createData;
+
+          if (!name || !email || !password) {
+            throw new Error('Name, email, and password are required');
+          }
+
+          if (email && !isValidEmail(email)) {
+            throw new Error('Invalid email format');
+          }  
+
+          if (email) {
+            const emailExists = await checkEmailExists(email);
+            if (emailExists) {
+              throw new Error('Email already in use');
+            }
+          }
+
+          if (password.length < 8) {
+            throw new Error('Password must be at least 8 characters long');
+          }
+      
           const userData = { name, email, password };
           const response = await fetch('http://localhost:5000/users', {
             method: 'POST',
             headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `${token}`
+              'Content-Type': 'application/json'
             },
             body: JSON.stringify(userData)
           });
+          const responseData = await response.json();
           if (!response.ok) {
-            throw new Error('Failed to create user');
+            if (responseData.error) {
+              throw new Error(responseData.error);
+            } else {
+              throw new Error('Failed to create user');
+            }
           }
           setCreateMessage('User has been created successfully');
         } catch (error) {
           console.error('Error creating user:', error);
           setCreateMessage(error.message);
         }
-        break;
+        break;    
       case 'update':
         try {
+          if (!userId) {
+            throw new Error('Email is required');
+          }
+
+          if (!updateData.name && !updateData.email && !updateData.password) {
+            throw new Error('At least one field (Name, Email, or Password) must be provided for update');
+          }
+
+          if (updateData.email && !isValidEmail(updateData.email)) {
+            throw new Error('Invalid email format');
+          }  
+
+          if (updateData.email) {
+            const emailExists = await checkEmailExists(updateData.email);
+            if (emailExists) {
+              throw new Error('Email already in use');
+            }
+          }
+          
+          if (updateData.password && updateData.password.length < 8) {
+            throw new Error('Password must be at least 8 characters long');
+          }
+      
           const { name, email, password } = updateData;
           const userData = { name, email, password };
           const response = await fetch(`http://localhost:5000/users/${userId}`, {
@@ -137,14 +206,19 @@ function Actions() {
             body: JSON.stringify(userData)
           });
           if (!response.ok) {
-            throw new Error('Failed to update user');
+            const responseData = await response.json();
+            if (responseData.error) {
+              throw new Error(responseData.error);
+            } else {
+              throw new Error('Failed to update user');
+            }
           }
           setUpdateMessage('User has been updated successfully');
         } catch (error) {
           console.error('Error updating user:', error);
           setUpdateMessage(error.message);
         }
-        break;
+        break;      
       default:
         break;
     }
@@ -223,9 +297,9 @@ function Actions() {
               <h1>Create User:</h1>
             </div>
             <div className='createPanel'>
-              <input type="text" placeholder="Name" value={createData.name} onChange={(e) => setCreateData({ ...createData, name: e.target.value })} />
-              <input type="email" placeholder="Email" value={createData.email} onChange={(e) => setCreateData({ ...createData, email: e.target.value })} />
-              <input type="password" placeholder="Password" value={createData.password} onChange={(e) => setCreateData({ ...createData, password: e.target.value })} />
+              <input type="text" placeholder="Name" value={createData.name} onChange={(e) => { const inputText = e.target.value.replace(/[^A-Za-z\s]/ig, '').slice(0, 64); setCreateData({ ...createData, name: inputText }); }} />
+              <input type="email" placeholder="Email" value={createData.email} onChange={(e) => setCreateData({ ...createData, email: e.target.value.slice(0, 64) })} />
+              <input type="password" placeholder="Password" value={createData.password} onChange={(e) => setCreateData({ ...createData, password: e.target.value.slice(0, 64) })} />
               <button onClick={() => handleActionSubmit('create')}>CREATE</button>
               {createMessage && <p>{createMessage}</p>}
             </div>
@@ -237,7 +311,7 @@ function Actions() {
               <h1>Verify User:</h1>
             </div>
             <div className='verifyPanel'>
-              <input type="text" placeholder="ENTER ID OR EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
+              <input type="text" placeholder="ENTER EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
               <button onClick={() => { handleActionSubmit('verify'); setVerifyClicked(true); }}>VERIFY</button>
             </div>
           </div>
@@ -248,21 +322,21 @@ function Actions() {
               <h1>Verify User:</h1>
             </div>
             <div className='verifyPanel'>
-              <input type="text" placeholder="ENTER ID OR EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
+              <input type="text" placeholder="ENTER EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
               <button onClick={() => { handleActionSubmit('verify'); setVerifyClicked(true); }}>VERIFY</button>
             </div>
             <div className='verifyInfo'>
-              {userList.length > 0 && userList[0] ? (
+              {verifiedUser ? (
                 <div>
                   <div className='verifyName'>
-                  <p className='infoTxt'>Name:&nbsp;</p><p className='infoValue'>{userList[0].name}</p>
+                    <p className='infoTxt'>Name:&nbsp;</p><p className='infoValue'>{verifiedUser.name}</p>
                   </div>
                   <div className='verifyEmail'>
-                  <p className='infoTxt'>Email:&nbsp;</p><p className='infoValue'> {userList[0].email}</p>
+                    <p className='infoTxt'>Email:&nbsp;</p><p className='infoValue'> {verifiedUser.email}</p>
                   </div>
                 </div>
               ) : (
-                <p>No user found</p>
+                <p></p>
               )}
               {verifyMessage && <p>{verifyMessage}</p>}
             </div>
@@ -274,7 +348,7 @@ function Actions() {
               <h1>Delete User:</h1>
             </div>
             <div className='deletePanel'>
-              <input type="text" placeholder="ENTER ID OR EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
+              <input type="text" placeholder="ENTER EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
               <button onClick={() => handleActionSubmit('delete')}>DELETE</button>
               {deleteMessage && <p>{deleteMessage}</p>}
             </div>
@@ -287,11 +361,11 @@ function Actions() {
             </div>
             <div className='updatePanel'>
               <div className='updateId'>           
-                <input type="text" placeholder="ENTER ID OR EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
+                <input type="text" placeholder="ENTER EMAIL" value={userId} onChange={(e) => setUserId(e.target.value)} />
               </div>
-              <input type="text" placeholder="Name" value={updateData.name} onChange={(e) => setUpdateData({ ...updateData, name: e.target.value })} />
-              <input type="email" placeholder="Email" value={updateData.email} onChange={(e) => setUpdateData({ ...updateData, email: e.target.value })} />
-              <input type="password" placeholder="Password" value={updateData.password} onChange={(e) => setUpdateData({ ...updateData, password: e.target.value })} />
+              <input type="text" placeholder="Name" value={updateData.name} onChange={(e) => setUpdateData({ ...updateData, name: e.target.value.replace(/[^A-Za-z\s]/ig, '').slice(0, 64) })} />
+              <input type="email" placeholder="Email" value={updateData.email} onChange={(e) => setUpdateData({ ...updateData, email: e.target.value.slice(0, 64) })} />
+              <input type="password" placeholder="Password" value={updateData.password} onChange={(e) => setUpdateData({ ...updateData, password: e.target.value.slice(0, 64) })} />
               <button onClick={() => handleActionSubmit('update')}>UPDATE</button>
               {updateMessage && <p>{updateMessage}</p>}
             </div>
