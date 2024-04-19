@@ -79,19 +79,19 @@ function UpdateUser() {
                     type="text"
                     placeholder="Name"
                     value={updateData.name}
-                    onChange={(e) => setUpdateData({ ...updateData, name: e.target.value })}
+                    onChange={(e) => setUpdateData({ ...updateData, name: e.target.value.replace(/[^A-Za-z\s]/ig, '') })}
                 />
                 <input
                     type="email"
                     placeholder="Email"
                     value={updateData.email}
-                    onChange={(e) => setUpdateData({ ...updateData, email: e.target.value })}
+                    onChange={(e) => setUpdateData({ ...updateData, email: e.target.value.slice(0, 64) })}
                 />
                 <input
                     type="password"
                     placeholder="Password"
                     value={updateData.password}
-                    onChange={(e) => setUpdateData({ ...updateData, password: e.target.value })}
+                    onChange={(e) => setUpdateData({ ...updateData, password: e.target.value.slice(0, 64) })}
                 />
                 <button onClick={handleUpdateUser}>UPDATE</button>
                 {updateMessage && <p>{updateMessage}</p>}
