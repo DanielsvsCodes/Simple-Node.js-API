@@ -57,11 +57,11 @@ npm start
 
 ## API Endpoints
 
-GET /users: Get a list of all users.
-GET /users/:userId: Get a single user by ID.
-POST /users: Create a new user.
-PATCH /users/:userId: Update an existing user.
-DELETE /users/:userId: Delete a user by ID.
+- GET /users: Get a list of all users.
+- GET /users/:userId: Get a single user by ID.
+- POST /users: Create a new user.
+- PATCH /users/:userId: Update an existing user.
+- DELETE /users/:userId: Delete a user by ID.
 
 ## Folder Structure
 
