@@ -17,7 +17,6 @@ This repository contains a simple CRUD (Create, Read, Update, Delete) applicatio
 - React: The frontend is built with React, providing an interactive user interface for interacting with the API.
 - React Router: React Router is used for client-side routing, allowing navigation between different pages of the application.
 - Axios: Axios is used for making HTTP requests from the React frontend to the Node.js backend.
-- Bootstrap: Bootstrap is used for styling the frontend components, providing a responsive and visually appealing design.
 
 ## Installation
 
@@ -38,7 +37,7 @@ npm install
 - Create a .env file in the backend directory.
 - Add the MongoDB connection URI to the .env file:
 ```
-MONGODB_URI=mongodb://localhost:27017/{name of the table}
+MONGODB_URI=mongodb://localhost:{database port}/{name of the table}
 ```
 
 4. Start the backend server:
