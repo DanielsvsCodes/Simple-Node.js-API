@@ -38,8 +38,7 @@ function SeeAllUsers() {
                         <tr>
                             <th>Name</th>
                             <th>Email</th>
-                            <th>Password</th>
-                            <th>Deleted</th>
+                            <th>Active</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -47,8 +46,7 @@ function SeeAllUsers() {
                             <tr key={user.id}>
                                 <td>{user.name}</td>
                                 <td>{user.email}</td>
-                                <td>{user.password}</td>
-                                <td>{user.deleted ? 'Yes' : 'No'}</td>
+                                <td>{user.deleted ? 'Inactive' : 'Active'}</td>
                             </tr>
                         ))}
                     </tbody>
