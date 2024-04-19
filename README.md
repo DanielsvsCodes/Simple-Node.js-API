@@ -23,7 +23,7 @@ This repository contains a simple CRUD (Create, Read, Update, Delete) applicatio
 
 1. Clone the repository:
 ```
-git clone <repository-url>
+git clone https://github.com/WickedSoda/Simple-Node.js-API
 ```
 
 2. Install dependencies for both the backend and frontend:
@@ -37,7 +37,9 @@ npm install
 3. Set up the MongoDB connection:
 - Create a .env file in the backend directory.
 - Add the MongoDB connection URI to the .env file:
-> MONGODB_URI=<your-mongodb-uri>
+```
+MONGODB_URI=mongodb://localhost:27017/{name of the table}
+```
 
 4. Start the backend server:
 ```
