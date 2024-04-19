@@ -42,7 +42,7 @@ MONGODB_URI=mongodb://localhost:{database port}/{name of the table}
 
 4. Start the backend server:
 ```
-cd backend
+cd server
 npm run dev
 ```
 
