@@ -64,5 +64,5 @@ npm start
 
 ## Folder Structure
 
-server: Contains the Node.js backend code.
-client: Contains the React frontend code.
+- server: Contains the Node.js backend code.
+- client: Contains the React frontend code.
