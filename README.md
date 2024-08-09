@@ -22,7 +22,7 @@ This repository contains a simple CRUD (Create, Read, Update, Delete) applicatio
 
 1. Clone the repository:
 ```
-git clone https://github.com/WickedSoda/Simple-Node.js-API
+git clone https://github.com/DanielsvsCodes/Simple-Node.js-API
 ```
 
 2. Install dependencies for both the backend and frontend:
